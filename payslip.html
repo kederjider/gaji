@@ -1,0 +1,1385 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Slip Gaji Karyawan</title>
+    <link rel="icon" type="image/png" href="parasmark.png" />
+
+    <style>
+      :root {
+        --ink: #0d1117;
+        --paper: #f5f0e8;
+        --accent: #1a3a5c;
+        --rule: #b0a090;
+        --highlight: #2d6a4f;
+        --red: #c0392b;
+        --stamp: rgba(26, 58, 92, 0.08);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #2c2c2c;
+        background-image: repeating-linear-gradient(
+          45deg,
+          transparent,
+          transparent 20px,
+          rgba(255, 255, 255, 0.01) 20px,
+          rgba(255, 255, 255, 0.01) 40px
+        );
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 40px 20px;
+      }
+
+      h1.page-title {
+        color: #ccc;
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        margin-bottom: 30px;
+        opacity: 0.6;
+      }
+
+      .slip-container {
+        background: #f5f0e8;
+        width: 100%;
+        max-width: 720px;
+        padding: 0;
+        box-shadow:
+          0 0 0 1px rgba(0, 0, 0, 0.15),
+          0 8px 40px rgba(0, 0, 0, 0.4),
+          inset 0 0 80px rgba(255, 255, 255, 0.3);
+        position: relative;
+        overflow: hidden;
+        animation: slideIn 0.6s ease;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateY(20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .slip-container.no-noise::before {
+        display: none !important;
+      }
+
+      .slip-container::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      .slip-header {
+        background: #1a3a5c;
+        color: white;
+        padding: 22px 32px;
+        position: relative;
+      }
+
+      .slip-header h2 {
+        font-family: "Courier New", monospace;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+      }
+
+      .slip-header .date {
+        font-family: "Courier New", monospace;
+        font-size: 11px;
+        margin-top: 4px;
+        opacity: 0.7;
+        letter-spacing: 1px;
+      }
+
+      .slip-header .month-badge {
+        position: absolute;
+        right: 32px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-family: "Courier New", monospace;
+        font-size: 11px;
+        letter-spacing: 2px;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        padding: 6px 12px;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .slip-body {
+        padding: 24px 32px;
+        position: relative;
+        z-index: 2;
+      }
+
+      .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 24px;
+        margin-bottom: 24px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #0d1117;
+      }
+
+      .info-row {
+        display: flex;
+        gap: 8px;
+        align-items: baseline;
+      }
+
+      .info-label {
+        font-family: "Courier New", monospace;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        color: #1a3a5c;
+        text-transform: uppercase;
+        min-width: 90px;
+        white-space: nowrap;
+      }
+
+      .info-value {
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+        color: #0d1117;
+        font-weight: 600;
+      }
+
+      .tables-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+        border: 1.5px solid #0d1117;
+      }
+
+      .col-earnings {
+        border-right: 1.5px solid #0d1117;
+      }
+
+      .col-header {
+        background: #0d1117;
+        color: #f5f0e8;
+        font-family: "Courier New", monospace;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        padding: 8px 12px;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .col-subheader {
+        background: rgba(0, 0, 0, 0.06);
+        font-family: "Courier New", monospace;
+        font-size: 9px;
+        color: #666;
+        padding: 4px 12px;
+        display: grid;
+        grid-template-columns: 1fr auto auto auto;
+        gap: 4px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        border-bottom: 1px solid #b0a090;
+      }
+
+      .item-row {
+        display: grid;
+        grid-template-columns: 1fr auto auto auto;
+        gap: 4px;
+        padding: 5px 12px;
+        font-family: "Courier New", monospace;
+        font-size: 11px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        align-items: center;
+        transition: background 0.15s;
+      }
+
+      .item-row:hover {
+        background: rgba(26, 58, 92, 0.04);
+      }
+
+      .item-row.section-label {
+        background: rgba(0, 0, 0, 0.04);
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: #555;
+        padding: 4px 12px;
+        display: block;
+      }
+
+      .item-name {
+        color: #0d1117;
+      }
+      .item-rate,
+      .item-unit,
+      .item-hrs {
+        color: #666;
+        font-size: 10px;
+        text-align: right;
+      }
+      .item-amount {
+        color: #0d1117;
+        font-weight: 600;
+        text-align: right;
+      }
+      .item-amount.negative {
+        color: #c0392b;
+      }
+      .item-amount.empty {
+        color: #ccc;
+      }
+
+      .deduct-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 5px 12px;
+        font-family: "Courier New", monospace;
+        font-size: 11px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        transition: background 0.15s;
+      }
+
+      .deduct-row:hover {
+        background: rgba(192, 57, 43, 0.04);
+      }
+      .deduct-name {
+        color: #0d1117;
+      }
+      .deduct-amount {
+        font-weight: 600;
+        color: #c0392b;
+      }
+      .deduct-amount.empty {
+        color: #ccc;
+      }
+
+      .totals-section {
+        margin-top: 0;
+        border: 1.5px solid #0d1117;
+        border-top: none;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        font-family: "Courier New", monospace;
+        font-size: 11px;
+        background: rgba(0, 0, 0, 0.04);
+        border-top: 1px solid #b0a090;
+      }
+
+      .total-label {
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-size: 10px;
+      }
+      .total-amount {
+        font-weight: 700;
+        color: #2d6a4f;
+        font-size: 13px;
+      }
+      .total-amount.red {
+        color: #c0392b;
+      }
+
+      .total-row.earnings {
+        border-right: 1.5px solid #0d1117;
+      }
+
+      .final-section {
+        padding: 16px 32px;
+        border-top: 2px solid #0d1117;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(26, 58, 92, 0.03);
+      }
+
+      .subtotals {
+        font-family: "Courier New", monospace;
+        font-size: 11px;
+        color: #666;
+      }
+      .subtotals div {
+        margin-bottom: 3px;
+      }
+      .subtotals span {
+        display: inline-block;
+        min-width: 160px;
+      }
+
+      .net-pay-box {
+        text-align: right;
+      }
+
+      .net-pay-label {
+        font-family: "Courier New", monospace;
+        font-size: 10px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: #1a3a5c;
+        margin-bottom: 4px;
+      }
+
+      .net-pay-amount {
+        font-family: "Courier New", monospace;
+        font-size: 32px;
+        font-weight: 700;
+        color: #1a3a5c;
+        letter-spacing: -1px;
+      }
+
+      .net-pay-amount span {
+        font-size: 16px;
+        font-weight: 400;
+        opacity: 0.6;
+      }
+
+      .sig-section {
+        padding: 16px 32px 24px;
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .sig-box {
+        text-align: center;
+      }
+
+      .sig-line {
+        width: 160px;
+        border-bottom: 1.5px solid #0d1117;
+        margin: 32px auto 6px;
+      }
+
+      .sig-label {
+        font-family: "Courier New", monospace;
+        font-size: 9px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #888;
+      }
+
+      /* Edit Panel */
+      .edit-panel {
+        background: #1e1e1e;
+        width: 100%;
+        max-width: 720px;
+        margin-top: 16px;
+        padding: 24px;
+        border-radius: 2px;
+      }
+
+      .edit-panel h3 {
+        font-family: "Courier New", monospace;
+        color: #aaa;
+        font-size: 10px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+      }
+
+      .edit-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px;
+      }
+
+      .edit-field label {
+        display: block;
+        font-family: "Courier New", monospace;
+        font-size: 9px;
+        color: #666;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+      }
+
+      .edit-field input {
+        width: 100%;
+        background: #2a2a2a;
+        border: 1px solid #333;
+        color: #eee;
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+        padding: 8px 10px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+
+      .edit-field input:focus {
+        border-color: #4a8ab0;
+      }
+
+      .btn-row {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      button {
+        font-family: "Courier New", monospace;
+        font-size: 11px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        padding: 10px 20px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .btn-update {
+        background: #1a3a5c;
+        color: white;
+      }
+
+      .btn-update:hover {
+        background: #2a4a6c;
+      }
+
+      .btn-print {
+        background: transparent;
+        border: 1px solid #444;
+        color: #888;
+      }
+
+      .btn-print:hover {
+        border-color: #888;
+        color: #ccc;
+      }
+
+      .btn-jpg {
+        background: transparent;
+        border: 1px solid #b8860b;
+        color: #d4a017;
+      }
+      .btn-jpg:hover {
+        background: #b8860b;
+        color: #fff;
+      }
+
+      .btn-loading {
+        opacity: 0.55;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
+
+      @media print {
+        body {
+          background: white;
+          padding: 0;
+        }
+        .edit-panel,
+        h1.page-title {
+          display: none;
+        }
+        .slip-container {
+          box-shadow: none;
+          max-width: 100%;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .tables-grid {
+          grid-template-columns: 1fr;
+        }
+        .col-earnings {
+          border-right: none;
+          border-bottom: 1.5px solid #0d1117;
+        }
+        .totals-section {
+          grid-template-columns: 1fr;
+        }
+        .total-row.earnings {
+          border-right: none;
+        }
+        .final-section {
+          flex-direction: column;
+          gap: 16px;
+          text-align: center;
+        }
+        .net-pay-box {
+          text-align: center;
+        }
+        .info-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1 class="page-title">Slip Gaji Karyawan</h1>
+
+    <div class="slip-container">
+      <!-- Header -->
+      <div class="slip-header">
+        <h2>Slip Gaji</h2>
+        <div class="date" id="display-date">30.03.2026</div>
+        <div class="month-badge" id="display-month">MARET 2026</div>
+      </div>
+
+      <!-- Body -->
+      <div class="slip-body">
+        <!-- Info Karyawan -->
+        <div class="info-grid">
+          <div class="info-row">
+            <span class="info-label">Nama</span>
+            <span class="info-value" id="d-name">ISI NAMA ANDA</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Employee</span>
+            <span class="info-value" id="d-emp">P009</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">IC No</span>
+            <span class="info-value" id="d-ic">—</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Dept</span>
+            <span class="info-value" id="d-dept">ZIZER</span>
+          </div>
+        </div>
+
+        <!-- Tables -->
+        <div class="tables-grid">
+          <!-- EARNINGS -->
+          <div class="col-earnings">
+            <div class="col-header">
+              <span>Pendapatan</span>
+              <span>RM</span>
+            </div>
+            <div class="col-subheader">
+              <span>Keterangan</span>
+              <span>Rate</span>
+              <span>Jam</span>
+              <span>Jumlah</span>
+            </div>
+
+            <div class="item-row section-label">Gaji Pokok</div>
+            <div class="item-row">
+              <span class="item-name">Basic Salary</span>
+              <span class="item-rate" id="d-basic-rate">35.02</span>
+              <span class="item-hrs empty" id="d-basic-days">—</span>
+              <span class="item-amount empty" id="d-basic-amt">—</span>
+            </div>
+
+            <div class="item-row section-label">Lembur</div>
+            <div class="item-row">
+              <span class="item-name">1.0× Overtime</span>
+              <span class="item-rate">4.37</span>
+              <span class="item-hrs" id="d-ot10-hrs">—</span>
+              <span class="item-amount empty" id="d-ot10-amt">—</span>
+            </div>
+            <div class="item-row">
+              <span class="item-name">1.5× Overtime</span>
+              <span class="item-rate">6.66</span>
+              <span class="item-hrs" id="d-ot15-hrs">—</span>
+              <span class="item-amount empty" id="d-ot15-amt">—</span>
+            </div>
+            <div class="item-row">
+              <span class="item-name">2.0× Overtime</span>
+              <span class="item-rate">7.69</span>
+              <span class="item-hrs">—</span>
+              <span class="item-amount empty">—</span>
+            </div>
+            <div class="item-row">
+              <span class="item-name">3.0× Overtime</span>
+              <span class="item-rate">11.54</span>
+              <span class="item-hrs">—</span>
+              <span class="item-amount empty">—</span>
+            </div>
+            <div class="item-row">
+              <span class="item-name">Sunday</span>
+              <span class="item-rate">4.37</span>
+              <span class="item-hrs" id="d-sunday-hrs">—</span>
+              <span class="item-amount empty" id="d-sunday-amt">—</span>
+            </div>
+            <div class="item-row">
+              <span class="item-name">Public Holiday</span>
+              <span class="item-rate">11.54</span>
+              <span class="item-hrs">—</span>
+              <span class="item-amount empty">—</span>
+            </div>
+
+            <div class="item-row section-label">Tunjangan</div>
+            <div class="item-row">
+              <span class="item-name">Daily Allowance</span>
+              <span class="item-rate"></span>
+              <span class="item-hrs"></span>
+              <span class="item-amount empty" id="d-daily-allow">—</span>
+            </div>
+            <div class="item-row">
+              <span class="item-name">Special Allowance</span>
+              <span class="item-rate"></span>
+              <span class="item-hrs"></span>
+              <span class="item-amount" id="d-special-allow">300</span>
+            </div>
+            <div class="item-row">
+              <span class="item-name">Monthly Allowance</span>
+              <span class="item-rate"></span>
+              <span class="item-hrs"></span>
+              <span class="item-amount empty" id="d-monthly-allow">—</span>
+            </div>
+          </div>
+
+          <!-- DEDUCTIONS -->
+          <div>
+            <div class="col-header">
+              <span>Potongan</span>
+              <span>RM</span>
+            </div>
+            <div style="padding: 4px 0"></div>
+
+            <div class="deduct-row">
+              <span class="deduct-name">Levy</span>
+              <span class="deduct-amount" id="d-levy">200.00</span>
+            </div>
+            <div class="deduct-row">
+              <span class="deduct-name">Ration</span>
+              <span class="deduct-amount" id="d-ration">125.00</span>
+            </div>
+            <div class="deduct-row">
+              <span class="deduct-name">Retention</span>
+              <span class="deduct-amount empty" id="d-retention">—</span>
+            </div>
+            <div class="deduct-row">
+              <span class="deduct-name">Ponteng</span>
+              <span class="deduct-amount empty" id="d-ponteng">—</span>
+            </div>
+            <div class="deduct-row">
+              <span class="deduct-name">Swab Test</span>
+              <span class="deduct-amount empty">—</span>
+            </div>
+            <div class="deduct-row">
+              <span class="deduct-name">Advance</span>
+              <span class="deduct-amount empty">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Totals Row -->
+        <div class="totals-section">
+          <div class="total-row earnings">
+            <span class="total-label">Total Pendapatan</span>
+            <span class="total-amount" id="d-total-earn">300.00</span>
+          </div>
+          <div class="total-row">
+            <span class="total-label">Total Potongan</span>
+            <span class="total-amount red" id="d-total-deduct">325.00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Final Net Pay -->
+      <div class="final-section">
+        <div class="subtotals">
+          <div><span>Sub Total</span> <strong id="d-subtotal">300</strong></div>
+          <div>
+            <span>Rounding Adj.</span> <strong id="d-rounding">+0.00</strong>
+          </div>
+        </div>
+        <div class="net-pay-box">
+          <div class="net-pay-label">Gaji Bersih</div>
+          <div class="net-pay-amount">
+            <span>RM</span> <span id="d-net">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Signature -->
+      <div class="sig-section">
+        <div class="sig-box">
+          <div class="sig-line"></div>
+          <div class="sig-label">Employee's Signature</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Panel -->
+    <div class="edit-panel">
+      <h3>✎ Edit Data Slip Gaji</h3>
+      <div class="edit-grid">
+        <div class="edit-field">
+          <label>Nama Karyawan</label>
+          <input type="text" id="i-name" value="ISI NAMA ANDA" />
+        </div>
+        <div class="edit-field">
+          <label>Employee No</label>
+          <input type="text" id="i-emp" value="P009" />
+        </div>
+        <div class="edit-field">
+          <label>IC No</label>
+          <input type="text" id="i-ic" value="" />
+        </div>
+        <div class="edit-field">
+          <label>Departemen</label>
+          <input type="text" id="i-dept" value="ZIZER" />
+        </div>
+        <div class="edit-field">
+          <label>Bulan</label>
+          <input type="text" id="i-month" value="MARET 2026" />
+        </div>
+        <div class="edit-field">
+          <label>Tanggal</label>
+          <input type="text" id="i-date" value="30.03.2026" />
+        </div>
+        <div class="edit-field">
+          <label>Rate Harian (RM)</label>
+          <input type="number" id="i-basic-rate" value="35.02" step="0.01" />
+        </div>
+        <div class="edit-field">
+          <label>Jumlah Hari Kerja</label>
+          <input
+            type="number"
+            id="i-basic-days"
+            value="0"
+            step="1"
+            min="1"
+            max="31"
+          />
+        </div>
+        <div class="edit-field">
+          <label>OT 1.0× Jam</label>
+          <input type="number" id="i-ot10" value="0" step="0.01" />
+        </div>
+        <div class="edit-field">
+          <label>OT 1.5× Jam</label>
+          <input type="number" id="i-ot15" value="0" step="0.01" />
+        </div>
+        <div class="edit-field">
+          <label>Sunday OT Jam</label>
+          <input type="number" id="i-sunday" value="0" step="0.01" />
+        </div>
+        <div class="edit-field">
+          <label>Daily Allowance (RM)</label>
+          <input type="number" id="i-daily" value="0" step="0.01" />
+        </div>
+        <div class="edit-field">
+          <label>Levy (RM)</label>
+          <input type="number" id="i-levy" value="200" step="0.01" />
+        </div>
+        <div class="edit-field">
+          <label>Special Allowance (RM)</label>
+          <input type="number" id="i-special" value="300" step="0.01" />
+        </div>
+
+        <div class="edit-field">
+          <label>Monthly Allowance (RM)</label>
+          <input type="number" id="i-monthly" value="0" step="0.01" />
+        </div>
+
+        <div class="edit-field">
+          <label>Ponteng (RM)</label>
+          <input type="number" id="i-ponteng" value="0" step="0.01" />
+        </div>
+        <div class="edit-field">
+          <label>Ration (RM)</label>
+          <input type="number" id="i-ration" value="125" step="0.01" />
+        </div>
+        <div class="edit-field">
+          <label>Retention (RM)</label>
+          <input type="number" id="i-retention" value="0" step="0.01" />
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-update" onclick="updateSlip()">
+          ↻ Perbarui Slip
+        </button>
+        <button class="btn-print" onclick="window.print()">⎙ Cetak</button>
+        <button class="btn-jpg" onclick="downloadJPG.call(this, event)">
+          ⬇ JPG
+        </button>
+      </div>
+    </div>
+
+    <script>
+      function fmt(n) {
+        return n.toLocaleString("en-MY", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+      }
+
+      function setAmt(id, value, hasValue) {
+        const el = document.getElementById(id);
+        if (hasValue && value > 0) {
+          el.textContent = fmt(value);
+          el.classList.remove("empty");
+          el.style.color = "";
+        } else {
+          el.textContent = "—";
+          el.classList.add("empty");
+        }
+      }
+
+      function setHrs(id, value) {
+        const el = document.getElementById(id);
+        if (value > 0) {
+          el.textContent = value.toFixed(2);
+          el.style.color = "#444";
+        } else {
+          el.textContent = "—";
+          el.style.color = "#ccc";
+        }
+      }
+
+      function updateSlip() {
+        const name = document.getElementById("i-name").value;
+        const emp = document.getElementById("i-emp").value;
+        const ic = document.getElementById("i-ic").value || "—";
+        const dept = document.getElementById("i-dept").value;
+        const month = document.getElementById("i-month").value;
+        const date = document.getElementById("i-date").value;
+        const basicRate =
+          parseFloat(document.getElementById("i-basic-rate").value) || 0;
+        const basicDays =
+          parseFloat(document.getElementById("i-basic-days").value) || 0;
+        const basic = parseFloat((basicRate * basicDays).toFixed(2));
+        const ot10hrs =
+          parseFloat(document.getElementById("i-ot10").value) || 0;
+        const ot15hrs =
+          parseFloat(document.getElementById("i-ot15").value) || 0;
+        const daily = parseFloat(document.getElementById("i-daily").value) || 0;
+        const levy = parseFloat(document.getElementById("i-levy").value) || 0;
+        const special =
+          parseFloat(document.getElementById("i-special").value) || 0;
+        const monthly =
+          parseFloat(document.getElementById("i-monthly").value) || 0;
+        const sundayHrs =
+          parseFloat(document.getElementById("i-sunday").value) || 0;
+        const ponteng =
+          parseFloat(document.getElementById("i-ponteng").value) || 0;
+        const ration =
+          parseFloat(document.getElementById("i-ration").value) || 0;
+        const retention =
+          parseFloat(document.getElementById("i-retention").value) || 0;
+
+        const ot10amt = ot10hrs * 4.37;
+        const ot15amt = ot15hrs * 6.66;
+        const sundayAmt = sundayHrs * 4.37;
+
+        const totalEarnings =
+          basic + ot10amt + ot15amt + sundayAmt + daily + special + monthly;
+        const totalDeductions = levy + ponteng + ration + retention;
+        const subtotal = totalEarnings - totalDeductions;
+
+        // Pembulatan ke 5 sen terdekat (0-2→0, 3-7→5, 8-9→10)
+        const cents = Math.round(Math.abs(subtotal) * 100);
+        const lastDigit = cents % 10;
+        let roundedCents;
+        if (lastDigit <= 2) {
+          roundedCents = Math.floor(cents / 10) * 10;
+        } else if (lastDigit <= 7) {
+          roundedCents = Math.floor(cents / 10) * 10 + 5;
+        } else {
+          roundedCents = Math.ceil(cents / 10) * 10;
+        }
+        const rounded = (roundedCents / 100) * (subtotal >= 0 ? 1 : -1);
+        const roundingAdj = rounded - subtotal;
+
+        // Update display
+        document.getElementById("d-name").textContent = name;
+        document.getElementById("d-emp").textContent = emp;
+        document.getElementById("d-ic").textContent = ic;
+        document.getElementById("d-dept").textContent = dept;
+        document.getElementById("display-month").textContent = month;
+        document.getElementById("display-date").textContent = date;
+        // Basic salary display
+        document.getElementById("d-basic-rate").textContent =
+          basicRate.toFixed(2);
+        document.getElementById("d-basic-days").textContent = basicDays;
+        setAmt("d-basic-amt", basic, true);
+        // OT 1.0x
+        setHrs("d-ot10-hrs", ot10hrs);
+        setAmt("d-ot10-amt", ot10amt, ot10hrs > 0);
+        setHrs("d-ot15-hrs", ot15hrs);
+        setAmt("d-ot15-amt", ot15amt, ot15hrs > 0);
+        setHrs("d-sunday-hrs", sundayHrs);
+        setAmt("d-sunday-amt", sundayAmt, sundayHrs > 0);
+        setAmt("d-daily-allow", daily, daily > 0);
+        setAmt("d-special-allow", special, special > 0);
+        setAmt("d-monthly-allow", monthly, monthly > 0);
+        setAmt("d-levy", levy, levy > 0);
+        setAmt("d-ponteng", ponteng, ponteng > 0);
+        setAmt("d-ration", ration, ration > 0);
+        setAmt("d-retention", retention, retention > 0);
+        document.getElementById("d-total-earn").textContent =
+          fmt(totalEarnings);
+        document.getElementById("d-total-deduct").textContent =
+          fmt(totalDeductions);
+        document.getElementById("d-subtotal").textContent = fmt(subtotal);
+        document.getElementById("d-net").textContent = fmt(rounded);
+        document.getElementById("d-rounding").textContent =
+          (roundingAdj >= 0 ? "+" : "") + roundingAdj.toFixed(2);
+
+        // Animate
+        document.querySelector(".net-pay-amount").style.transform =
+          "scale(1.05)";
+        setTimeout(
+          () =>
+            (document.querySelector(".net-pay-amount").style.transform =
+              "scale(1)"),
+          200,
+        );
+      }
+
+      document.querySelector(".net-pay-amount").style.transition =
+        "transform 0.2s ease";
+
+      function drawSlipToCanvas() {
+        // Ambil semua data dari DOM
+        const g = (id) =>
+          document.getElementById(id)?.textContent?.trim() || "";
+
+        const data = {
+          month: g("display-month"),
+          date: g("display-date"),
+          name: g("d-name"),
+          emp: g("d-emp"),
+          ic: g("d-ic"),
+          dept: g("d-dept"),
+          basicRate: g("d-basic-rate"),
+          basicDays: g("d-basic-days"),
+          basicAmt: g("d-basic-amt"),
+          ot10hrs: g("d-ot10-hrs"),
+          ot10amt: g("d-ot10-amt"),
+          ot15hrs: g("d-ot15-hrs"),
+          ot15amt: g("d-ot15-amt"),
+          sundayHrs: g("d-sunday-hrs"),
+          sundayAmt: g("d-sunday-amt"),
+          dailyAllow: g("d-daily-allow"),
+          specAllow: g("d-special-allow"),
+          monthlyAllow: g("d-monthly-allow"),
+          levy: g("d-levy"),
+          ration: g("d-ration"),
+          retention: g("d-retention"),
+          ponteng: g("d-ponteng"),
+          totalEarn: g("d-total-earn"),
+          totalDeduct: g("d-total-deduct"),
+          subtotal: g("d-subtotal"),
+          net: g("d-net"),
+        };
+
+        // Warna
+        const C = {
+          paper: "#f5f0e8",
+          ink: "#0d1117",
+          accent: "#1a3a5c",
+          green: "#2d6a4f",
+          red: "#c0392b",
+          grey: "#888888",
+          lgrey: "#bbbbbb",
+          rule: "#b0a090",
+          subhdr: "#666666",
+          secbg: "#e8e3da",
+          hdrbg: "#0d1117",
+          rowhover: "#f0ece2",
+        };
+
+        const SCALE = 3;
+        const W = 720,
+          H = 780;
+        const canvas = document.createElement("canvas");
+        canvas.width = W * SCALE;
+        canvas.height = H * SCALE;
+        const ctx = canvas.getContext("2d");
+        ctx.scale(SCALE, SCALE);
+
+        // Font helpers
+        const mono = (sz) => `${sz}px "Courier New", monospace`;
+        const sans = (sz) => `${sz}px "Segoe UI", Tahoma, sans-serif`;
+
+        // ── Background ─────────────────────────────────────
+        ctx.fillStyle = C.paper;
+        ctx.fillRect(0, 0, W, H);
+
+        // ── HEADER ─────────────────────────────────────────
+        ctx.fillStyle = C.accent;
+        ctx.fillRect(0, 0, W, 70);
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = 'bold 18px "Courier New", monospace';
+        ctx.letterSpacing = "2px";
+        ctx.fillText("SLIP GAJI", 32, 30);
+        ctx.font = '11px "Courier New", monospace';
+        ctx.fillStyle = "rgba(255,255,255,0.75)";
+        ctx.fillText(data.date, 32, 50);
+
+        // Month badge top-right
+        const mbText = data.month;
+        ctx.font = '10px "Courier New", monospace';
+        const mbW = ctx.measureText(mbText).width + 24;
+        ctx.strokeStyle = "rgba(255,255,255,0.5)";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(W - mbW - 24, 22, mbW, 24);
+        ctx.fillStyle = "rgba(255,255,255,0.85)";
+        ctx.fillText(mbText, W - mbW - 12, 38);
+
+        // ── INFO GRID ──────────────────────────────────────
+        let y = 95;
+        const labelFont = 'bold 10px "Courier New", monospace';
+        const valFont = 'bold 12px "Courier New", monospace';
+
+        function infoRow(lx, label, value) {
+          ctx.font = labelFont;
+          ctx.fillStyle = C.accent;
+          ctx.fillText(label.toUpperCase(), lx, y);
+          ctx.font = valFont;
+          ctx.fillStyle = C.ink;
+          ctx.fillText(value, lx + 80, y);
+        }
+
+        infoRow(32, "Nama", data.name);
+        infoRow(380, "Employee", data.emp);
+        y += 22;
+        infoRow(32, "IC No", data.ic || "—");
+        infoRow(380, "Dept", data.dept);
+
+        y += 16;
+        ctx.strokeStyle = C.ink;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(32, y);
+        ctx.lineTo(W - 32, y);
+        ctx.stroke();
+
+        // ── TABLE SETUP ────────────────────────────────────
+        y += 8;
+        const tLeft = 32;
+        const tRight = W - 32;
+        const tMid = tLeft + (tRight - tLeft) * 0.5;
+        const tW = tRight - tLeft;
+        const rowH = 22;
+
+        function colHeader(x, w, label) {
+          ctx.fillStyle = C.hdrbg;
+          ctx.fillRect(x, y, w, 26);
+          ctx.fillStyle = C.paper;
+          ctx.font = 'bold 10px "Courier New", monospace';
+          ctx.fillText(label.toUpperCase(), x + 10, y + 17);
+          ctx.font = '10px "Courier New", monospace';
+          ctx.fillText("RM", x + w - 30, y + 17);
+        }
+
+        colHeader(tLeft, tMid - tLeft, "Pendapatan");
+        colHeader(tMid + 1, tRight - tMid - 1, "Potongan");
+        y += 26;
+
+        // Sub-header earnings
+        ctx.fillStyle = C.secbg;
+        ctx.fillRect(tLeft, y, tMid - tLeft, 20);
+        ctx.font = '9px "Courier New", monospace';
+        ctx.fillStyle = C.subhdr;
+        const subW = tMid - tLeft;
+        ctx.fillText("KETERANGAN", tLeft + 8, y + 13);
+        ctx.fillText("RATE", tLeft + subW * 0.55, y + 13);
+        ctx.fillText("JAM", tLeft + subW * 0.72, y + 13);
+        ctx.fillText("JUMLAH", tLeft + subW * 0.84, y + 13);
+        y += 20;
+
+        // Divider line
+        ctx.strokeStyle = C.rule;
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(tLeft, y);
+        ctx.lineTo(tMid, y);
+        ctx.stroke();
+
+        // ── EARNINGS ROWS ──────────────────────────────────
+        let ey = y; // earnings y tracker
+        let dy = y; // deductions y tracker
+
+        function sectionLabel(label) {
+          ctx.fillStyle = C.secbg;
+          ctx.fillRect(tLeft, ey, tMid - tLeft, 18);
+          ctx.font = 'bold 9px "Courier New", monospace';
+          ctx.fillStyle = "#444";
+          ctx.fillText(label.toUpperCase(), tLeft + 8, ey + 12);
+          ey += 18;
+        }
+
+        function earningRow(name, rate, hrs, amt, isEmpty) {
+          ctx.font = '11px "Courier New", monospace';
+          const rW = tMid - tLeft;
+          // name
+          ctx.fillStyle = C.ink;
+          ctx.fillText(name, tLeft + 8, ey + 15);
+          // rate
+          ctx.fillStyle = C.subhdr;
+          ctx.font = '9px "Courier New", monospace';
+          if (rate) ctx.fillText(rate, tLeft + rW * 0.52, ey + 15);
+          // hrs
+          if (hrs) ctx.fillText(hrs, tLeft + rW * 0.7, ey + 15);
+          // amount
+          ctx.font = 'bold 11px "Courier New", monospace';
+          ctx.fillStyle = isEmpty ? C.lgrey : C.ink;
+          const amtW = ctx.measureText(amt).width;
+          ctx.fillText(amt, tMid - amtW - 10, ey + 15);
+          // bottom border
+          ctx.strokeStyle = "rgba(0,0,0,0.07)";
+          ctx.lineWidth = 0.5;
+          ctx.beginPath();
+          ctx.moveTo(tLeft, ey + rowH);
+          ctx.lineTo(tMid, ey + rowH);
+          ctx.stroke();
+          ey += rowH;
+        }
+
+        sectionLabel("Gaji Pokok");
+        earningRow(
+          "Basic Salary",
+          data.basicRate,
+          data.basicDays,
+          data.basicAmt,
+          false,
+        );
+
+        sectionLabel("Lembur");
+        earningRow(
+          "1.0× Overtime",
+          "4.37",
+          data.ot10hrs,
+          data.ot10amt === "—" ? "—" : data.ot10amt,
+          data.ot10amt === "—",
+        );
+        earningRow(
+          "1.5× Overtime",
+          "6.66",
+          data.ot15hrs,
+          data.ot15amt === "—" ? "—" : data.ot15amt,
+          data.ot15amt === "—",
+        );
+        earningRow("2.0× Overtime", "7.69", "—", "—", true);
+        earningRow("3.0× Overtime", "11.54", "—", "—", true);
+        earningRow(
+          "Sunday",
+          "4.37",
+          data.sundayHrs,
+          data.sundayAmt === "—" ? "—" : data.sundayAmt,
+          data.sundayAmt === "—",
+        );
+        earningRow("Public Holiday", "11.54", "—", "—", true);
+
+        sectionLabel("Tunjangan");
+        earningRow(
+          "Daily Allowance",
+          "",
+          "",
+          data.dailyAllow === "—" ? "—" : data.dailyAllow,
+          data.dailyAllow === "—",
+        );
+        earningRow(
+          "Special Allowance",
+          "",
+          "",
+          data.specAllow === "—" ? "—" : data.specAllow,
+          data.specAllow === "—",
+        );
+        earningRow(
+          "Monthly Allowance",
+          "",
+          "",
+          data.monthlyAllow === "—" ? "—" : data.monthlyAllow,
+          data.monthlyAllow === "—",
+        );
+
+        // ── DEDUCTIONS ROWS ────────────────────────────────
+        function deductRow(name, amt, isEmpty) {
+          ctx.font = '11px "Courier New", monospace';
+          ctx.fillStyle = C.ink;
+          ctx.fillText(name, tMid + 10, dy + 15);
+          ctx.font = 'bold 11px "Courier New", monospace';
+          ctx.fillStyle = isEmpty ? C.lgrey : C.red;
+          const amtW = ctx.measureText(amt).width;
+          ctx.fillText(amt, tRight - amtW - 10, dy + 15);
+          ctx.strokeStyle = "rgba(0,0,0,0.07)";
+          ctx.lineWidth = 0.5;
+          ctx.beginPath();
+          ctx.moveTo(tMid, dy + rowH);
+          ctx.lineTo(tRight, dy + rowH);
+          ctx.stroke();
+          dy += rowH;
+        }
+
+        dy += 26; // skip earnings sub-header area
+        deductRow(
+          "Levy",
+          data.levy === "—" ? "—" : data.levy,
+          data.levy === "—",
+        );
+        deductRow(
+          "Ration",
+          data.ration === "—" ? "—" : data.ration,
+          data.ration === "—",
+        );
+        deductRow(
+          "Retention",
+          data.retention === "—" ? "—" : data.retention,
+          data.retention === "—",
+        );
+        deductRow(
+          "Ponteng",
+          data.ponteng === "—" ? "—" : data.ponteng,
+          data.ponteng === "—",
+        );
+        deductRow("Swab Test", "—", true);
+        deductRow("Advance", "—", true);
+
+        // ── TABLE BORDERS ──────────────────────────────────
+        const tableBottom = Math.max(ey, dy);
+
+        ctx.strokeStyle = C.ink;
+        ctx.lineWidth = 1.5;
+        // Outer border
+        ctx.strokeRect(tLeft, y - 46, tW, tableBottom - y + 46);
+        // Middle divider
+        ctx.beginPath();
+        ctx.moveTo(tMid, y - 46);
+        ctx.lineTo(tMid, tableBottom);
+        ctx.stroke();
+
+        // ── TOTALS ROW ─────────────────────────────────────
+        y = tableBottom;
+        const totH = 30;
+
+        ctx.fillStyle = C.secbg;
+        ctx.fillRect(tLeft, y, tW, totH);
+
+        ctx.font = 'bold 10px "Courier New", monospace';
+        ctx.fillStyle = C.ink;
+        ctx.fillText("TOTAL PENDAPATAN", tLeft + 10, y + 19);
+
+        ctx.font = 'bold 13px "Courier New", monospace';
+        ctx.fillStyle = C.green;
+        const teW = ctx.measureText(data.totalEarn).width;
+        ctx.fillText(data.totalEarn, tMid - teW - 10, y + 20);
+
+        ctx.font = 'bold 10px "Courier New", monospace';
+        ctx.fillStyle = C.ink;
+        ctx.fillText("TOTAL POTONGAN", tMid + 10, y + 19);
+
+        ctx.font = 'bold 13px "Courier New", monospace';
+        ctx.fillStyle = C.red;
+        const tdW = ctx.measureText(data.totalDeduct).width;
+        ctx.fillText(data.totalDeduct, tRight - tdW - 10, y + 20);
+
+        ctx.strokeStyle = C.ink;
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(tLeft, y, tW, totH);
+        ctx.beginPath();
+        ctx.moveTo(tMid, y);
+        ctx.lineTo(tMid, y + totH);
+        ctx.stroke();
+        y += totH;
+
+        // ── FINAL SECTION ──────────────────────────────────
+        y += 8;
+        ctx.strokeStyle = C.ink;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(32, y);
+        ctx.lineTo(W - 32, y);
+        ctx.stroke();
+        y += 18;
+
+        ctx.font = '11px "Courier New", monospace';
+        ctx.fillStyle = C.subhdr;
+        ctx.fillText("Sub Total", tLeft, y);
+        ctx.fillText(data.subtotal, tLeft + 160, y);
+        y += 18;
+        ctx.fillText("Rounding Adj.", tLeft, y);
+
+        // Calculate rounding adjustment for canvas
+        const subtotalNum = parseFloat(data.subtotal.replace(/,/g, ""));
+        const netNum = parseFloat(data.net.replace(/,/g, ""));
+        const adjNum = netNum - subtotalNum;
+        const adjText = (adjNum >= 0 ? "+" : "") + adjNum.toFixed(2);
+        ctx.fillText(adjText, tLeft + 160, y);
+
+        // Net Pay
+        ctx.font = 'bold 10px "Courier New", monospace';
+        ctx.fillStyle = C.accent;
+        const npLabel = "GAJI BERSIH";
+        const npLW = ctx.measureText(npLabel).width;
+        ctx.fillText(npLabel, tRight - npLW, y - 18);
+
+        ctx.font = 'bold 34px "Courier New", monospace';
+        ctx.fillStyle = C.accent;
+        const netText = "RM " + data.net;
+        const ntW = ctx.measureText(netText).width;
+        ctx.fillText(netText, tRight - ntW, y + 14);
+
+        // ── SIGNATURE LINE ─────────────────────────────────
+        y += 60;
+        ctx.strokeStyle = C.ink;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(tRight - 160, y);
+        ctx.lineTo(tRight, y);
+        ctx.stroke();
+        ctx.font = '9px "Courier New", monospace';
+        ctx.fillStyle = C.grey;
+        const slabel = "EMPLOYEE'S SIGNATURE";
+        const slW = ctx.measureText(slabel).width;
+        ctx.fillText(slabel, tRight - slW, y + 14);
+
+        return canvas;
+      }
+
+      async function downloadJPG(event) {
+        const btn = this;
+        btn.textContent = "⏳ Memproses...";
+        btn.classList.add("btn-loading");
+        try {
+          const canvas = drawSlipToCanvas();
+          const name = document
+            .getElementById("d-name")
+            .textContent.trim()
+            .replace(/\s+/g, "_");
+          const month = document
+            .getElementById("display-month")
+            .textContent.trim()
+            .replace(/\s+/g, "_");
+          const link = document.createElement("a");
+          link.download = "SlipGaji_" + name + "_" + month + ".jpg";
+          link.href = canvas.toDataURL("image/jpeg", 1.0);
+          link.click();
+        } catch (e) {
+          alert("Gagal download: " + e.message);
+        } finally {
+          btn.textContent = "⬇ JPG";
+          btn.classList.remove("btn-loading");
+        }
+      }
+    </script>
+  </body>
+</html>
